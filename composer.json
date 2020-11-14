@@ -1,0 +1,30 @@
+{
+    "name": "pdepend/dump",
+    "description": "Dump PDepend AST",
+    "type": "library",
+    "require": {
+        "php": "^7.4 || ^8.0",
+        "pdepend/pdepend": "^2.8"
+    },
+    "require-dev": {
+        "pestphp/pest": "^0.3.12"
+    },
+    "scripts": {
+        "test": "pest",
+        "test-with-coverage": "pest --coverage --coverage-html=coverage --min=100"
+    },
+    "autoload": {
+        "psr-4": {
+            "PDependDump\\": "src/PDependDump/"
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "KyleKatarn",
+            "email": "kylekatarnls@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
