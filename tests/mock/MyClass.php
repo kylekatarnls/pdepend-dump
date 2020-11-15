@@ -10,6 +10,11 @@ final class MyClass implements Countable
 {
     private int $count;
 
+    /**
+     * @var string
+     */
+    private $text;
+
     public function __construct(int $count)
     {
         $this->count = $count;

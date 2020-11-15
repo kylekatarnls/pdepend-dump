@@ -20,6 +20,11 @@
             "PDependDump\\": "src/PDependDump/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\PDependDump\\": "tests/PDependDump/"
+        }
+    },
     "license": "MIT",
     "authors": [
         {

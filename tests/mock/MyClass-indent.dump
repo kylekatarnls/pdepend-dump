@@ -1,0 +1,13 @@
+namespace: Foo↵
+    classes:↵
+        class: MyClass↵
+            classOrInterfaceReference: \Countable↵
+            fieldDeclaration: ↵
+                scalarType: int↵
+                variableDeclarator: $count↵
+            comment: /**
+     * @var string
+     */↵
+            fieldDeclaration: ↵
+                scalarType: string↵
+                variableDeclarator: $text↵

@@ -18,3 +18,8 @@ function clean(string $dump): string
 
     return $dump;
 }
+
+function expectToMatchFile(string $content, string $filePath): void
+{
+    expect(clean($content))->toBe(file_get_contents($filePath));
+}

@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace PDependDump;
 
-use InvalidArgumentException;
 use PDepend\Source\AST\AbstractASTArtifact;
 use PDepend\Source\AST\ASTArtifact;
-use PDepend\Source\AST\ASTClassOrInterfaceReference;
 use PDepend\Source\AST\ASTNamespace;
 use PDepend\Source\AST\ASTNode;
 use PDepend\Source\Builder\Builder;
 use PDepend\Source\Language\PHP\PHPParserGeneric;
 use PDepend\Source\Language\PHP\PHPTokenizerInternal;
 use PDepend\Util\Cache\CacheDriver;
+use PDependDump\Exception\InvalidArgumentException;
 use PDependDump\NodeParser\ASTNamespaceParser;
 use PDependDump\NodeParser\NodeParser;
+use Traversable;
 
 final class Dump
 {
@@ -29,7 +29,7 @@ final class Dump
 
     /**
      * @var string[]
-     * @psalm-var array<class-string<ASTArtifact>, class-string<NodeParser>>
+     * @psalm-var array<class-string<ASTArtifact>, NodeParser|class-string<NodeParser>>
      */
     private $parsers = [
         ASTNamespace::class => ASTNamespaceParser::class,
@@ -75,17 +75,18 @@ final class Dump
      * Change the list of the custom parsers.
      *
      * @param string[] $parsers
-     * @psalm-param array<class-string<ASTArtifact>, class-string<NodeParser>> $parsers
+     * @psalm-param array<class-string<ASTArtifact>, NodeParser|class-string<NodeParser>> $parsers
      */
     public function setParsers(array $parsers): void
     {
         foreach ($parsers as $node => $parser) {
-            if ($parser instanceof NodeParser) {
+            if (is_a($parser, NodeParser::class, true)) {
                 continue;
             }
 
             throw new InvalidArgumentException(
                 "Parser for $node is not a " . NodeParser::class,
+                1,
             );
         }
 
@@ -94,23 +95,11 @@ final class Dump
 
     /**
      * @return string[]
-     * @psalm-return array<class-string<ASTArtifact>, class-string<NodeParser>>
+     * @psalm-return array<class-string<ASTArtifact>, NodeParser|class-string<NodeParser>>
      */
     public function getParsers(): array
     {
         return $this->parsers;
-    }
-
-    /**
-     * @param string $nodeClass
-     * @psalm-param class-string<ASTArtifact> $nodeClass
-     *
-     * @return string|null
-     * @psalm-return class-string<NodeParser>|null
-     */
-    public function getParserClass(string $nodeClass): ?string
-    {
-        return $this->parsers[$nodeClass] ?? null;
     }
 
     /**
@@ -122,11 +111,17 @@ final class Dump
      */
     public function getParser(string $nodeClass): ?NodeParser
     {
-        $parserClass = $this->getParserClass($nodeClass);
-
-        if (!$parserClass) {
+        if (!isset($this->parsers[$nodeClass])) {
             return null;
         }
+
+        $parserClass = $this->parsers[$nodeClass];
+
+        if ($parserClass instanceof NodeParser) {
+            return $parserClass;
+        }
+
+        $parserClass = (string) $parserClass;
 
         if (!isset($this->parsersCache[$parserClass])) {
             $this->parsersCache[$parserClass] = new $parserClass();
@@ -189,6 +184,7 @@ final class Dump
             throw new InvalidArgumentException(
                 'Given ' . (is_object($node) ? get_class($node) : gettype($node)) .
                     ' is neither ' . ASTNode::class . ' nor ' . ASTArtifact::class,
+                2,
             );
         }
     }
@@ -236,15 +232,28 @@ final class Dump
             return;
         }
 
-        if (!method_exists($node, 'getChildren')) {
-            return;
-        }
-
-        foreach ($node->getChildren() as $child) {
+        foreach ($this->getChildren($node) as $child) {
             foreach ($this->nodeAsLines($child, $indent + 1) as $line) {
                 yield $line;
             }
         }
+    }
+
+    /**
+     * Iterate over children of an object implementing getChildren() method. Return empty iterator for
+     * any other object.
+     *
+     * @param ASTNode|ASTArtifact|mixed $node
+     *
+     * @return iterable|Traversable
+     */
+    public function getChildren($node): iterable
+    {
+        if (!method_exists($node, 'getChildren')) {
+            return;
+        }
+
+        yield from $node->getChildren();
     }
 
     public function dumpNode($node, int $indent = 0): string

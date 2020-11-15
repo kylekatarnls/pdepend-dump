@@ -9,5 +9,4 @@ namespace: Foo
      * @var string
      */
       fieldDeclaration:
-        scalarType: string
         variableDeclarator: $text
