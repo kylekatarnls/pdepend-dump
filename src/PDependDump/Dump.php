@@ -136,7 +136,7 @@ final class Dump
      * @param string $file
      * @param bool   $ignoreAnnotations
      *
-     * @return Builder|ASTNamespace[]
+     * @return Builder
      */
     public function parse(string $file, bool $ignoreAnnotations = false): Builder
     {
@@ -168,6 +168,13 @@ final class Dump
         }
     }
 
+    /**
+     * Return true if given $node is an PDepend AST node (ASTNode or ASTArtifact).
+     *
+     * @param ASTNode|ASTArtifact|mixed $node
+     *
+     * @return bool
+     */
     public function isNode($node): bool
     {
         return $node instanceof ASTNode || $node instanceof ASTArtifact;
