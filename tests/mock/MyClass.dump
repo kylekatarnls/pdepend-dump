@@ -1,0 +1,7 @@
+namespace: Foo
+  classes:
+    class: MyClass
+      classOrInterfaceReference: \Countable
+      fieldDeclaration:
+        scalarType: int
+        variableDeclarator: $count

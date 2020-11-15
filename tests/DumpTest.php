@@ -5,6 +5,7 @@ declare(strict_types=1);
 use PDepend\Source\Language\PHP\PHPBuilder;
 use PDepend\Util\Cache\Driver\MemoryCacheDriver;
 use PDependDump\Dump;
+use function Tests\clean;
 
 test('has list command', function () {
     $cache = new MemoryCacheDriver();
@@ -12,8 +13,6 @@ test('has list command', function () {
 
     $dump = new Dump($cache, $builder);
 
-    foreach ($dump->chunks(__DIR__ . '/mock/MyClass.php') as $chunk) {
-        echo $chunk;
-    }
-    exit;
+    expect(clean($dump->dump(__DIR__ . '/mock/MyClass.php')))
+        ->toBe(file_get_contents(__DIR__ . '/mock/MyClass.dump'));
 });
